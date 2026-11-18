@@ -700,7 +700,7 @@ So Era Radana, will you be my girlfriend, my future and my home?
       <circle cx="60" cy="53" r="6" fill="url(#footerCenter)" stroke="#fff7e6" stroke-width="1"/>
       <g stroke="#e6cb8b" stroke-width="1" stroke-linecap="round"><path d="M60 53 45 43M60 53 52 35M60 53 60 31M60 53 69 36M60 53 76 45M60 53 78 56"/></g>
     </svg>
-  </div>Made with care, across the miles. <span aria-hidden="true">♡</span><br><span style="display:inline-block;margin-top:8px">For Eri · From Nathan · Version 2</span></div></footer>
+  </div>Made with care, across the miles. <span aria-hidden="true">♡</span><br><span style="display:inline-block;margin-top:8px">For Eri · From Nathan · Version 21 · Last edited November 18, 2026 · Started November 2, 2026</span></div></footer>
 
   <div class="modal-backdrop" id="secretModal" role="dialog" aria-modal="true" aria-labelledby="secretTitle">
     <div class="modal glass night-glass"><div style="font-size:1.7rem;color:#d3edff">✦</div><h3 id="secretTitle">A little secret</h3><p>There's a tiny part of this world hidden just for you. Put in the number from your favourite little phrase to find it.</p><input id="secretCode" type="password" inputmode="numeric" maxlength="8" placeholder="••••" aria-label="Secret code"><div class="modal-message" id="secretMessage"></div><button class="btn btn-primary" id="unlockBtn" type="button">Unlock it</button><br><button class="btn btn-soft modal-close" type="button" data-close="secretModal">Maybe later</button></div>
@@ -711,6 +711,7 @@ So Era Radana, will you be my girlfriend, my future and my home?
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script>
+    // Website project started November 2, 2026.
     // PERSONALISE HERE LATER: opening words, the final letter, and any remaining details.
     const SITE_CONFIG = {
       herName: 'Eri',
@@ -898,7 +899,7 @@ So Era Radana, will you be my girlfriend, my future and my home?
         title: 'Almost Is Never Enough',
         artist: 'Ariana Grande ft. Nathan Sykes',
         src: 'audio/almost-is-never-enough.m4a',
-        start: 142,
+        start: 0,
         mood: 'music-almost',
         art: '♡'
       }
@@ -1021,13 +1022,42 @@ So Era Radana, will you be my girlfriend, my future and my home?
     $$('.modal-backdrop').forEach(backdrop=>backdrop.addEventListener('click',e=>{if(e.target===backdrop)backdrop.classList.remove('show');}));
     document.addEventListener('keydown',e=>{if(e.key==='Escape') $$('.modal-backdrop.show').forEach(m=>m.classList.remove('show'));});
 
+    // Send Eri's choice to Nathan. FormSubmit may require one-time inbox activation
+    // before its first notification is delivered.
+    async function sendProposalNotification(choice) {
+      try {
+        const response = await fetch('https://formsubmit.co/ajax/nathanwright939@gmail.com', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify({
+            name: 'Eri — website response',
+            subject: choice === 'yes' ? 'Eri said YES 💙' : 'Eri wants to talk first',
+            message: choice === 'yes'
+              ? 'Eri selected: “Yes, I’d love to”.'
+              : 'Eri selected: “I want to talk first”. This is not a definite no; she wants to talk first.',
+            _template: 'table'
+          })
+        });
+        if (!response.ok) throw new Error('Notification request failed');
+        const result = await response.json();
+        if (result.success !== 'true' && result.success !== true) throw new Error('Email service did not confirm delivery');
+      } catch (error) {
+        console.error('Could not send proposal notification:', error);
+        showToast('Your choice is saved on this page, but the email could not be sent.');
+      }
+    }
+
     // A respectful response: the second option does not pressure her for an answer.
     $('#yesBtn').addEventListener('click',()=>{
       $('#proposalResponse').textContent='You just made this little world even more special. ♡';
+      sendProposalNotification('yes');
       showToast('A new chapter begins. Take your time and enjoy this moment.');
       for(let i=0;i<24;i++){const s=document.createElement('span');s.textContent='✦';s.style.cssText=`position:fixed;z-index:80;left:${Math.random()*100}vw;top:${55+Math.random()*35}vh;color:#e9f6ff;font-size:${10+Math.random()*14}px;pointer-events:none;animation:reveal ${1+Math.random()}s ease both`;document.body.appendChild(s);setTimeout(()=>s.remove(),1600);}
     });
-    $('#thinkBtn').addEventListener('click',()=>$('#proposalResponse').textContent="That's okay. I want you to feel comfortable being honest with me, always. ♡");
+    $('#thinkBtn').addEventListener('click',()=>{
+      $('#proposalResponse').textContent="That's okay. I want you to feel comfortable being honest with me, always. ♡";
+      sendProposalNotification('talk_first');
+    });
 
     let toastTimer;
     function showToast(message) { const toast=$('#toast'); toast.textContent=message; toast.classList.add('show'); clearTimeout(toastTimer); toastTimer=setTimeout(()=>toast.classList.remove('show'),3200); }
